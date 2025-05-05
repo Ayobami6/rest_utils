@@ -1,3 +1,5 @@
+use std::any;
+
 use serde::{Deserialize, Serialize};
 
 pub fn get_env_var(key: &str) -> String {
@@ -26,7 +28,7 @@ impl Response {
     }
 }
 impl Response {
-    pub fn to_json(&self) -> String {
+    pub fn to_json(&self) -> serde_json::Value {
         let mut response = serde_json::json!({
             "status": self.status,
             "message": self.message,
@@ -36,6 +38,6 @@ impl Response {
             response["data"] = data.clone();
         }
 
-        serde_json::to_string(&response).unwrap()
+        serde_json::json!(&response)
     }
 }

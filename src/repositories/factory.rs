@@ -3,6 +3,7 @@ use crate::config::db::DbPool;
 use super::token_repositories::{TokenRepository, TokenRepositoryImpl};
 use super::utils_repositories::{UtilsRepository, UtilsRepositoryImpl};
 
+#[derive(Clone)]
 pub struct RepositoryFactory {
     pool: DbPool,
 }
