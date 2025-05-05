@@ -16,6 +16,7 @@ pub fn register_token_routes(cfg: &mut ServiceConfig) {
     cfg.service(generate_token);
 }
 
+// TODO: Make Idempotent
 #[actix_web::get("/tokens")]
 async fn generate_token(
     repo_factory: web::Data<RepositoryFactory>,
