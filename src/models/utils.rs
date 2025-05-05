@@ -3,7 +3,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Queryable, Selectable, Deserialize)]
+#[derive(Debug, Queryable, Selectable, Deserialize, Serialize)]
 #[diesel(table_name = utils)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Utils {

@@ -18,3 +18,9 @@ pub struct Token {
 pub struct NewTokenDTO {
     pub token: String,
 }
+
+impl NewTokenDTO {
+    pub fn new(token: String) -> Self {
+        Self { token }
+    }
+}

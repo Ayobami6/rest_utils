@@ -1,19 +1,28 @@
 mod config;
 mod models;
 mod repositories;
+mod routes;
 mod schema;
 mod utils;
+use actix_cors::Cors;
+use actix_web::http;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use config::db::{connect_db, DbPool};
 use dotenvy::dotenv;
 use repositories::factory::RepositoryFactory;
+use routes::utils_routes::register_utils_routes;
 use utils::utils::get_env_var;
 use utils::utils::Response;
 
 #[actix_web::get("/")]
 async fn health() -> impl Responder {
-    let response = Response::new("success".to_string(), "Server is running".to_string(), None);
+    let response = Response::new(
+        "success".to_string(),
+        "Server is running".to_string(),
+        200,
+        None,
+    );
     let response = response.to_json();
     HttpResponse::Ok().json(response)
 }
@@ -37,10 +46,19 @@ async fn main() -> std::io::Result<()> {
         .expect("Invalid port number in environment variable");
     println!("🚀 Starting server on port 🚀 {}", port);
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+            .allowed_headers(vec![
+                http::header::AUTHORIZATION,
+                http::header::CONTENT_TYPE,
+            ])
+            .max_age(3600);
         App::new()
+            .wrap(cors)
             .app_data(web::Data::new(factory.clone()))
             .service(health)
-            // .configure(register_user_routes)
+            .configure(register_utils_routes)
             .wrap(Logger::default())
     })
     .bind(("127.0.0.1", port))?

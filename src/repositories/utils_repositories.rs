@@ -22,10 +22,11 @@ impl UtilsRepositoryImpl {
 impl UtilsRepository for UtilsRepositoryImpl {
     fn fetch_initial_utils(&self) -> Utils {
         let conn = &mut self.pool.get().expect("Failed to get DB connection");
-        utils
+        let res = utils
             .select(Utils::as_select())
             .limit(1)
             .first::<Utils>(conn)
-            .expect("Failed to fetch initial utils")
+            .expect("Failed to fetch initial utils");
+        res
     }
 }
