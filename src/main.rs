@@ -11,6 +11,7 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use config::db::{connect_db, DbPool};
 use dotenvy::dotenv;
 use repositories::factory::RepositoryFactory;
+use routes::token_routes::register_token_routes;
 use routes::utils_routes::register_utils_routes;
 use utils::utils::get_env_var;
 use utils::utils::Response;
@@ -59,6 +60,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(factory.clone()))
             .service(health)
             .configure(register_utils_routes)
+            .configure(register_token_routes)
             .wrap(Logger::default())
     })
     .bind(("127.0.0.1", port))?

@@ -6,6 +6,8 @@ diesel::table! {
         #[max_length = 255]
         token -> Varchar,
         created_at -> Nullable<Timestamp>,
+        #[max_length = 45]
+        ip_address -> Nullable<Varchar>,
     }
 }
 
