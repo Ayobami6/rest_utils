@@ -1,10 +1,13 @@
 use actix_web::{
     web::{self, ServiceConfig},
-    HttpResponse, Responder,
+    HttpRequest, HttpResponse, Responder,
 };
 
 use crate::{
-    repositories::{factory::RepositoryFactory, utils_repositories::UtilsRepository},
+    repositories::{
+        factory::RepositoryFactory, token_repositories::TokenRepository,
+        utils_repositories::UtilsRepository,
+    },
     utils::utils::Response,
 };
 use serde_json::to_value;
@@ -14,8 +17,31 @@ pub fn register_utils_routes(cfg: &mut ServiceConfig) {
 }
 
 #[actix_web::get("/utils/first")]
-async fn get_initial_utils(repo_factory: web::Data<RepositoryFactory>) -> impl Responder {
+async fn get_initial_utils(
+    repo_factory: web::Data<RepositoryFactory>,
+    req: HttpRequest,
+) -> impl Responder {
     let utils_repo = repo_factory.create_utils_repository();
+    // get the token from the request header
+    let token_options = req.headers().get("Token");
+    let token = match token_options {
+        Some(token) => match token.to_str() {
+            Ok(token_str) => token_str,
+            Err(_) => return HttpResponse::Unauthorized().body("Token not found"),
+        },
+        None => return HttpResponse::Unauthorized().body("Token not found"),
+    };
+    // get the token object by the token
+    let token_repo = repo_factory.create_token_repository();
+    let token = token_repo.get_token(&token);
+    let exists = match token {
+        Ok(_) => true,
+        Err(_) => return HttpResponse::Unauthorized().body("Token not found"),
+    };
+    // if not exists unathorized
+    if !exists {
+        return HttpResponse::Unauthorized().body("Token not found");
+    }
     let utils = utils_repo.fetch_initial_utils();
     let data = match to_value(utils) {
         Ok(val) => Some(val),
