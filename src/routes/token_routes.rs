@@ -22,15 +22,36 @@ async fn generate_token(
     repo_factory: web::Data<RepositoryFactory>,
     req: HttpRequest,
 ) -> impl Responder {
-    let token_repo = repo_factory.create_token_repository();
     // generate uuid token
-    let token = Uuid::new_v4().to_string();
+    let token_repo = repo_factory.create_token_repository();
     let ip = req
         .connection_info()
         .realip_remote_addr()
         .unwrap_or("unknown")
         .to_string();
     let ip_string = ip.clone().to_string();
+    // lets check the if this ip address has token already
+    let token = token_repo.get_token_by_ip(&ip_string);
+    let token = match token {
+        Ok(token) => Some(to_value(token).unwrap()),
+        Err(e) => {
+            println!("Error finding token: {:?}", e);
+            None
+        }
+    };
+    // this makes the api idempotent
+    if token.is_some() {
+        let response = Response::new(
+            "success".to_string(),
+            "Token already exists".to_string(),
+            200,
+            token,
+        );
+        let response = response.to_json();
+        return HttpResponse::Ok().json(response);
+    }
+
+    let token = Uuid::new_v4().to_string();
     let new_token = NewTokenDTO::new(token, ip_string.clone());
 
     let created_token = token_repo.create_token(&new_token);

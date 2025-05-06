@@ -8,6 +8,7 @@ use diesel::result::QueryResult;
 pub trait TokenRepository {
     fn get_token(&self, token: &str) -> QueryResult<Token>;
     fn create_token(&self, token: &NewTokenDTO) -> QueryResult<Token>;
+    fn get_token_by_ip(&self, ip: &str) -> QueryResult<Token>;
 }
 
 // implementation of the TokenRepository trait
@@ -26,6 +27,13 @@ impl TokenRepository for TokenRepositoryImpl {
         let conn = &mut self.pool.get().expect("Failed to get DB connection");
         tokens::table
             .filter(tokens::token.eq(token_parsed))
+            .first::<Token>(conn)
+    }
+
+    fn get_token_by_ip(&self, ip: &str) -> QueryResult<Token> {
+        let conn = &mut self.pool.get().expect("Failed to get DB connection");
+        tokens::table
+            .filter(tokens::ip_address.eq(ip))
             .first::<Token>(conn)
     }
 
