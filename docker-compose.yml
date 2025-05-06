@@ -1,0 +1,9 @@
+services:
+  rest_utils:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: utils_app
+    ports:
+      - "8282:8282"
+    command: "./api"
