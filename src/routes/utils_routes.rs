@@ -8,7 +8,7 @@ use crate::{
         factory::RepositoryFactory, token_repositories::TokenRepository,
         utils_repositories::UtilsRepository,
     },
-    utils::utils::Response,
+    utils::utils::{service_response, Response},
 };
 use serde_json::to_value;
 
@@ -27,25 +27,25 @@ async fn get_initial_utils(
     let token = match token_options {
         Some(token) => match token.to_str() {
             Ok(token_str) => token_str,
-            Err(_) => return HttpResponse::Unauthorized().body("Token not found"),
+            Err(_) => return service_response(401, "Unauthorized", "error", None),
         },
-        None => return HttpResponse::Unauthorized().body("Token not found"),
+        None => return service_response(401, "Unauthorized", "error", None),
     };
     // get the token object by the token
     let token_repo = repo_factory.create_token_repository();
     let token = token_repo.get_token(&token);
     let exists = match token {
         Ok(_) => true,
-        Err(_) => return HttpResponse::Unauthorized().body("Token not found"),
+        Err(_) => return service_response(401, "Unauthorized", "error", None),
     };
     // if not exists unathorized
     if !exists {
-        return HttpResponse::Unauthorized().body("Token not found");
+        return service_response(401, "Unauthorized", "error", None);
     }
     let utils = utils_repo.fetch_initial_utils();
     let data = match to_value(utils) {
         Ok(val) => Some(val),
-        Err(_) => return HttpResponse::InternalServerError().body("Failed to serialize response"),
+        Err(_) => return service_response(500, "Something went wrong", "error", None),
     };
     let response = Response::new(
         "success".to_string(),
