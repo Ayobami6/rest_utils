@@ -6,4 +6,15 @@ services:
     container_name: utils_app
     ports:
       - "8282:8282"
+    env_file:
+      - .env
     command: "./api"
+
+  rest_slim:
+    image: rest_utils-rest_utils.slim
+    ports:
+      - "8282:8282"
+    env_file:
+      - .env
+    command: ["/app/api"] 
+  
