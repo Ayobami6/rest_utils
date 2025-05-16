@@ -19,13 +19,15 @@ pub struct Token {
 pub struct NewTokenDTO {
     pub token: String,
     pub ip_address: Option<String>,
+    pub created_at: Option<NaiveDateTime>,
 }
 
 impl NewTokenDTO {
-    pub fn new(token: String, ip_address: String) -> Self {
+    pub fn new(token: String, ip_address: String, created_at: NaiveDateTime) -> Self {
         Self {
             token,
             ip_address: Some(ip_address),
+            created_at: Some(created_at),
         }
     }
 }

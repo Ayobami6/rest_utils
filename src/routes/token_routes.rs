@@ -9,6 +9,7 @@ use crate::{
     repositories::{factory::RepositoryFactory, token_repositories::TokenRepository},
     utils::utils::Response,
 };
+use chrono::Utc;
 
 use serde_json::to_value;
 
@@ -52,7 +53,7 @@ async fn generate_token(
     }
 
     let token = Uuid::new_v4().to_string();
-    let new_token = NewTokenDTO::new(token, ip_string.clone());
+    let new_token = NewTokenDTO::new(token, ip_string.clone(), Utc::now().naive_utc());
 
     let created_token = token_repo.create_token(&new_token);
     let data = match created_token {
